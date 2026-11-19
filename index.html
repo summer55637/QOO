@@ -506,9 +506,9 @@
             <div id="gacha-wb-line" style="min-height:20px;font-size:13px;margin:0 0 4px;font-weight:700;text-align:center;color:#f5c451">世界王抽抽樂 <span id="gacha-wb-count">0</span></div>
             <button class="btn-gold" id="gacha-1" style="width:100%;padding:12px;line-height:1.3">單抽 300000</button>
             <button class="btn-gold" id="gacha-10" style="margin-top:8px;width:100%;padding:12px;line-height:1.3">十連抽 3000000</button>
-            <button class="btn-gold" id="gacha-1000" style="margin-top:8px;width:100%;padding:12px;line-height:1.3">千連抽（最多 3 億金幣）</button>
+            <button class="btn-gold" id="gacha-1000" style="margin-top:8px;width:100%;padding:12px;line-height:1.3">十萬抽（10000 批／最多 300 億金幣）</button>
             <div id="gacha-1000-status" class="dim" style="font-size:12px;line-height:1.6;margin-top:6px;min-height:18px"></div>
-            <button class="btn-dark hidden" id="gacha-1000-stop" style="margin-top:6px;width:100%;padding:9px;border-color:#b45309;color:#fbbf24">停止千連抽（本批完成後停止）</button>
+            <button class="btn-dark hidden" id="gacha-1000-stop" style="margin-top:6px;width:100%;padding:9px;border-color:#b45309;color:#fbbf24">停止十萬抽（本批完成後停止）</button>
             <button class="btn-dark" id="gacha-wb" style="margin-top:8px;width:100%;padding:10px;border-color:#f5c451;color:#f5c451">世界王抽抽樂</button>
             <button class="btn-dark" id="gacha-wb10" style="margin-top:8px;width:100%;padding:10px;border-color:#f5c451;color:#f5c451">世界王十連抽（需 10 張）</button>
             <button class="btn-dark" id="gacha-info" style="margin-top:8px;width:100%;padding:10px;border-color:#a855f7;color:#e9d5ff">獎勵查看</button>
@@ -575,8 +575,8 @@ function finishPandora1000(t){
   clearTimeout(e.timer);clearTimeout(e.timeout);
   pandoraBatch=null;bn=!1;gn=Date.now()+2700;ll(!1);
   const n=Object.keys(e.items).reduce((t,n)=>t+e.items[n],0);
-  const a=(e.batches>=100&&e.draws>=1000)?"千連抽完成":(t||"已停止");
-  setPandora1000Status(a+"｜已完成 "+e.batches+"/100 批（"+e.draws+"/1000 抽）");
+  const a=(e.batches>=10000&&e.draws>=100000)?"十萬抽完成":(t||"已停止");
+  setPandora1000Status(a+"｜已完成 "+e.batches+"/10000 批（"+e.draws+"/100000 抽）");
   let i=Object.keys(e.items).sort((t,n)=>t.localeCompare(n,"zh-Hant")).map(t=>'<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 6px;border-bottom:1px solid #30251a"><span style="min-width:0;overflow-wrap:anywhere">'+esc(t)+'</span><b style="flex:none;color:#f5c451">×'+e.items[t].toLocaleString()+'</b></div>').join("");
   const s=Object.keys(e.bonus).sort((t,n)=>t.localeCompare(n,"zh-Hant")).map(t=>'<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 6px"><span>'+esc(t)+'（額外贈送）</span><b style="color:#7bd14a">×'+e.bonus[t].toLocaleString()+'</b></div>').join("");
   $("gacha-display").className=e.jackpot?"win":"";
@@ -600,7 +600,7 @@ function sendPandora1000(){
   if(t.stopRequested){finishPandora1000("已依要求停止");return}
   if(!socket||!socket.connected){finishPandora1000("連線中斷，已停止；請先確認目前金幣與背包");return}
   t.waiting=true;
-  setPandora1000Status("抽獎中… "+t.batches+"/100 批（"+t.draws+"/1000 抽）");
+  setPandora1000Status("抽獎中… "+t.batches+"/10000 批（"+t.draws+"/100000 抽）");
   t.timeout=setTimeout(()=>{if(pandoraBatch!==t)return;t.waiting=false;finishPandora1000("伺服器回應逾時，已停止且不自動重試；請先檢查金幣與背包");gn=Date.now()+60000},60000);
   try{socket.emit("pandora10")}catch(e){clearTimeout(t.timeout);t.waiting=false;finishPandora1000("送出抽獎請求失敗，已停止；請檢查金幣與背包")}
 }
@@ -613,11 +613,11 @@ function handlePandora10Result(t){
   if(t.bonus&&t.bonus.n){const n=String(t.bonus.n);e.bonus[n]=(e.bonus[n]||0)+Math.max(1,Number(t.bonus.count)||10)}
   if(typeof t.gold==="number"&&Number.isFinite(t.gold)){e.gold=t.gold;$("gacha-gold").textContent=t.gold.toLocaleString()}
   t.pity&&null!=t.pity.count&&ol(t.pity.count);
-  setPandora1000Status("已完成 "+e.batches+"/100 批（"+e.draws+"/1000 抽）｜傳說 "+e.jackpot+" 件");
+  setPandora1000Status("已完成 "+e.batches+"/10000 批（"+e.draws+"/100000 抽）｜傳說 "+e.jackpot+" 件");
   gn=Date.now()+2700;
   if(t.results.length!==10){finishPandora1000("本批回傳數量不是 10，為避免錯誤已停止；請檢查金幣與背包");return}
   if(e.stopRequested){finishPandora1000("已依要求停止");return}
-  if(e.batches>=100){finishPandora1000("千連抽完成");return}
+  if(e.batches>=10000){finishPandora1000("十萬抽完成");return}
   if(Number.isFinite(e.gold)&&e.gold<3000000){finishPandora1000("金幣不足以繼續，已提前停止");return}
   e.timer=setTimeout(sendPandora1000,2750);
 }
@@ -625,14 +625,14 @@ function startPandora1000(){
   if(pandoraBatch||bn||Date.now()<gn)return;
   if(!socket||!socket.connected){toast("連線尚未就緒，請稍後再試");return}
   const t=Number(lastState&&lastState.char&&lastState.char.gold||0);
-  if(t<300000000){toast("金幣不足；千連抽最多需要 3 億金幣");return}
-  confirmBox("將連續執行 100 次原本的十連抽，共 1,000 抽，最多消耗 3 億金幣。每批完成後才會送出下一批，停止只會在目前這批結束後生效。是否開始？",()=>{
+  if(t<30000000000){toast("金幣不足；十萬抽最多需要 300 億金幣");return}
+  confirmBox("將連續執行 10,000 次原本的十連抽，共 100,000 抽，最多消耗 300 億金幣。每批完成後才會送出下一批，預計需要長時間執行；停止只會在目前這批結束後生效。是否開始？",()=>{
     if(pandoraBatch||bn||Date.now()<gn)return;
     const n=Number(lastState&&lastState.char&&lastState.char.gold||0);
-    if(n<300000000){toast("金幣不足；千連抽最多需要 3 億金幣");return}
+    if(n<30000000000){toast("金幣不足；十萬抽最多需要 300 億金幣");return}
     pandoraBatch={batches:0,draws:0,items:Object.create(null),bonus:Object.create(null),jackpot:0,gold:n,waiting:false,stopRequested:false,timer:null,timeout:null};
-    bn=!0;ll(!1);setPandora1000Status("準備開始… 0/100 批（0/1000 抽）");
-    $("gacha-msg").textContent="千連抽開始，逐批結算中…";
+    bn=!0;ll(!1);setPandora1000Status("準備開始… 0/10000 批（0/100000 抽）");
+    $("gacha-msg").textContent="十萬抽開始，逐批結算中…";
     $("gacha-display").className="";$("gacha-display").innerHTML='<div class="gacha-idle">🎰</div>';
     const w=$("gacha-1000-stop");w&&w.classList.remove("hidden");
     const b=$("gacha-wb"),v=$("gacha-wb10");b&&(b.disabled=!0);v&&(v.disabled=!0);
