@@ -1,0 +1,19 @@
+# Local-only launcher and development server (not used by GitHub Pages)
+serve-offline.mjs
+LaunchOfflineGame.ps1
+啟動放置天地單機版.*
+
+# Local dependencies, logs and temporary files
+node_modules/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Private/local player-save exports
+mockSave*.json
+local_accounts.json
+
+# Local backups
+*成功備份*/
+*完整備份*/
