@@ -60,12 +60,14 @@
     if (now - lastPersistAt >= 1000) saveOffsets();
   };
 
-  function setSpeed(speed) {
+  function setSpeed(speed, persist = true) {
     selectedSpeed = cleanSpeed(speed);
     window.__wbSpeedMultiplier = selectedSpeed;
-    try {
-      localStorage.setItem(SPEED_KEY, String(selectedSpeed));
-    } catch (_) {}
+    if (persist) {
+      try {
+        localStorage.setItem(SPEED_KEY, String(selectedSpeed));
+      } catch (_) {}
+    }
     updateButtons();
   }
 
@@ -83,27 +85,27 @@
     }
   }
 
-  let wasInBossCombat = false;
-  let speedBeforeBossCombat = selectedSpeed;
+  let wasInCombat = false;
+  let speedBeforeCombat = selectedSpeed;
 
   function updateVisibility() {
     if (!speedBar) return;
     const area = document.getElementById("boss-area");
     const stop = document.getElementById("btn-stop");
-    const inBossCombat = !!area && !!stop &&
-      !area.classList.contains("hidden") &&
-      !stop.classList.contains("hidden");
+    const inCombat = !!stop && !stop.classList.contains("hidden");
+    const inBossCombat = inCombat && !!area && !area.classList.contains("hidden");
 
-    // Automatically use 5x only while a world-boss fight is active.
-    // Restore the player's previously selected speed when the fight ends.
-    if (inBossCombat && !wasInBossCombat) {
-      speedBeforeBossCombat = selectedSpeed;
-      setSpeed(5);
-    } else if (!inBossCombat && wasInBossCombat) {
-      setSpeed(speedBeforeBossCombat);
+    // Automatically use 5x during every combat, including normal hunting.
+    // Restore the player's previously selected speed when combat ends.
+    if (inCombat && !wasInCombat) {
+      speedBeforeCombat = selectedSpeed;
+      setSpeed(5, false);
+    } else if (!inCombat && wasInCombat) {
+      setSpeed(speedBeforeCombat);
     }
-    wasInBossCombat = inBossCombat;
+    wasInCombat = inCombat;
 
+    // Keep the existing speed controls visible only in the world-boss panel.
     speedBar.style.display = inBossCombat ? "flex" : "none";
   }
 
@@ -138,7 +140,7 @@
     }
 
     const note = document.createElement("span");
-    note.textContent = "只加速世界王戰鬥";
+    note.textContent = "戰鬥中自動使用 5×";
     note.style.cssText = "color:#b6a684;font-size:11px;margin-left:2px;";
     speedBar.appendChild(note);
 
