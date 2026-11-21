@@ -60,12 +60,14 @@
     if (now - lastPersistAt >= 1000) saveOffsets();
   };
 
-  function setSpeed(speed) {
+  function setSpeed(speed, persist = true) {
     selectedSpeed = cleanSpeed(speed);
     window.__wbSpeedMultiplier = selectedSpeed;
-    try {
-      localStorage.setItem(SPEED_KEY, String(selectedSpeed));
-    } catch (_) {}
+    if (persist) {
+      try {
+        localStorage.setItem(SPEED_KEY, String(selectedSpeed));
+      } catch (_) {}
+    }
     updateButtons();
   }
 
@@ -97,7 +99,7 @@
     // Restore the player's previously selected speed when combat ends.
     if (inCombat && !wasInCombat) {
       speedBeforeCombat = selectedSpeed;
-      setSpeed(5);
+      setSpeed(5, false);
     } else if (!inCombat && wasInCombat) {
       setSpeed(speedBeforeCombat);
     }
