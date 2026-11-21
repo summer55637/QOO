@@ -83,6 +83,9 @@
     }
   }
 
+  let wasInBossCombat = false;
+  let speedBeforeBossCombat = selectedSpeed;
+
   function updateVisibility() {
     if (!speedBar) return;
     const area = document.getElementById("boss-area");
@@ -90,6 +93,17 @@
     const inBossCombat = !!area && !!stop &&
       !area.classList.contains("hidden") &&
       !stop.classList.contains("hidden");
+
+    // Automatically use 5x only while a world-boss fight is active.
+    // Restore the player's previously selected speed when the fight ends.
+    if (inBossCombat && !wasInBossCombat) {
+      speedBeforeBossCombat = selectedSpeed;
+      setSpeed(5);
+    } else if (!inBossCombat && wasInBossCombat) {
+      setSpeed(speedBeforeBossCombat);
+    }
+    wasInBossCombat = inBossCombat;
+
     speedBar.style.display = inBossCombat ? "flex" : "none";
   }
 
